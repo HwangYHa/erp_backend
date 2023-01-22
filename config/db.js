@@ -11,7 +11,7 @@
 
 import { Sequelize } from "sequelize";
  
-const db = new Sequelize('userinfo_db', 'root', '0000', {
+const db = new Sequelize('gursung_db', 'root', '0000', {
     host: "localhost",
     dialect: "mysql"
 });

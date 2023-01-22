@@ -34,15 +34,13 @@ export const Register = async(req, res) => {
 }
  
 export const Login = async(req, res) => {
-
     try {
-        const user = await Users.findOne({
+        const user = await Users.findAll({
             where:{
-                email: req.body.email,
-                password: req.body.password
+                email: req.body.email
             }
         });
-        
+       
         const match = await bcrypt.compare(req.body.password, user[0].password);
         if(!match) return res.status(400).json({msg: "Wrong Password"});
         const userId = user[0].id;
@@ -65,6 +63,7 @@ export const Login = async(req, res) => {
         });
         res.json({ accessToken });
     } catch (error) {
+        console.log("error = = = > ", error)
         res.status(404).json({msg:"Email not found"});
     }
 }
