@@ -1,4 +1,5 @@
 import Users from "../models/UserModel.js";
+import Client from "../models/ClientModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
  
@@ -17,6 +18,7 @@ export const getUsers = async(req, res) => {
  
 export const Register = async(req, res) => {
     const { name, email, password, confPassword, phone } = req.body;
+    
     if(password !== confPassword) return res.status(400).json({msg: "Password and Confirm Password do not match"});
     const salt = await bcrypt.genSalt();
     const hashPassword = await bcrypt.hash(password, salt);
@@ -42,7 +44,7 @@ export const Login = async(req, res) => {
         });
        
         const match = await bcrypt.compare(req.body.password, user[0].password);
-        if(!match) return res.status(400).json({msg: "Wrong Password"});
+        if(!match) return res.status(400).json({msg: "비밀번호를 잘못 입력했습니다.\n입력하신 내용을 다시 확인해주세요."});
         const userId = user[0].id;
         const name = user[0].name;
         const email = user[0].email;
@@ -64,7 +66,7 @@ export const Login = async(req, res) => {
         res.json({ accessToken });
     } catch (error) {
         console.log("error = = = > ", error)
-        res.status(404).json({msg:"Email not found"});
+        res.status(404).json({msg:"이메일 또는 비밀번호를 잘못 입력했습니다.\n입력하신 내용을 다시 확인해주세요."});
     }
 }
  
@@ -85,4 +87,18 @@ export const Logout = async(req, res) => {
     });
     res.clearCookie('refreshToken');
     return res.sendStatus(200);
+}
+ 
+// 거래처 리스트
+export const getClients = async(req, res) => {
+    try {
+        const client = await Client.findAll({
+            attributes:['id','client_cd','client_nm','representative','company_nb','phone','useStatus','transferInfo','Address']
+        });
+        console.log("client",client)
+        res.json(client);
+        
+    } catch (error) {
+        console.log('error = = > ',error);
+    }
 }

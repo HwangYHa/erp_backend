@@ -19,15 +19,9 @@ const Users = db.define('user_tb',{
     refresh_token:{
         type: DataTypes.TEXT
     }
-},{
-    freezeTableName:true
 });
- 
-(async () => {
-    await db.sync();
-    console.log('데이터베이스 연결 성공');
-})();
- 
-
-
+// (async () => {
+//     await db.sync();
+//     console.log('데이터베이스 연결 성공');
+// })();
 export default Users;

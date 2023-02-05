@@ -10,10 +10,20 @@
 // module.exports = db;
 
 import { Sequelize } from "sequelize";
- 
+
 const db = new Sequelize('gursung_db', 'root', '0000', {
     host: "localhost",
-    dialect: "mysql"
+    dialect: "mysql",
+    pool: {
+        max: 5,
+        min: 0,
+        idle: 10000
+    },
+    define: {
+        freezeTableName: true,
+        timestamps: false,
+    }
 });
- 
+
+
 export default db;
