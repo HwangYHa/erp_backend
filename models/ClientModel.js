@@ -27,6 +27,13 @@ const Client = db.define('client_tb',{
     },
     Address:{
         type: DataTypes.STRING
-    }
+    },
+
+    businessStatus:{
+        type: DataTypes.STRING
+    },
+    event:{
+        type: DataTypes.STRING
+    },
 });
 export default Client;
