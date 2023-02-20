@@ -1,17 +1,19 @@
 import express from "express";
-import { getUsers, Register, Login, Logout, getClients, ClientRegister } from "../controllers/Users.js";
+import { getUsers, registerUser, Login, Logout } from "../controllers/Users.js";
 import { verifyToken } from "../middleware/VerifyToken.js";
 import { refreshToken } from "../controllers/RefreshToken.js";
- 
-const router = express.Router();
- 
-router.get('/users', verifyToken, getUsers);
-router.post('/users', Register);
-router.post('/login', Login);
-router.get('/token', refreshToken);
-router.delete('/logout', Logout);
+import { getClients, registerClient } from "../controllers/Clients.js";
 
-router.get('/erp/client-Register', getClients);
-router.post('/erp/clientsRegister', ClientRegister);
- 
-export default router;
+const userRouter = express.Router();
+const clientRouter = express.Router();
+
+userRouter.get('/users', verifyToken, getUsers);
+userRouter.post('/users', registerUser);
+userRouter.post('/login', Login);
+userRouter.get('/token', refreshToken);
+userRouter.delete('/logout', Logout);
+
+clientRouter.get('/erp/client-Register', getClients);
+clientRouter.post('/erp/clientsRegister', registerClient);
+
+export { userRouter, clientRouter };

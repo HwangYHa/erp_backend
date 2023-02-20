@@ -1,119 +1,112 @@
 import Users from "../models/UserModel.js";
-import Client from "../models/ClientModel.js";
 import bcrypt from "bcrypt";
+import crypto from'crypto';
 import jwt from "jsonwebtoken";
- 
-export const getUsers = async(req, res) => {
+// 취약점및 보완점 패치 완료(2023.02.20)
+
+// 사용자 정보 반환
+export const getUsers = async (req, res) => {
     try {
         const users = await Users.findAll({
-            attributes:['id','name','email','phone']
+            attributes: ['id', 'name', 'email', 'phone']
         });
-        console.log("users",users)
         res.json(users);
-        
     } catch (error) {
         console.log(error);
+        res.status(500).json({ msg: "Server Error" });
     }
 }
- 
-export const Register = async(req, res) => {
+
+// 사용자 등록
+export const registerUser = async (req, res) => {
     const { name, email, password, confPassword, phone } = req.body;
-    
-    if(password !== confPassword) return res.status(400).json({msg: "Password and Confirm Password do not match"});
-    const salt = await bcrypt.genSalt();
-    const hashPassword = await bcrypt.hash(password, salt);
+
+    if (password !== confPassword) return res.status(400).json({ msg: "Password and Confirm Password do not match" });
+
     try {
-        await Users.create({
+        const saltRounds = 12;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashPassword = await bcrypt.hash(password, salt);
+        const user = await Users.create({
             name: name,
             email: email,
             password: hashPassword,
             phone: phone
         });
-        res.json({msg: "Registration Successful"});
+        res.json({ msg: "Registration Successful", user });
     } catch (error) {
         console.log(error);
-    }
-}
- 
-export const Login = async(req, res) => {
-    try {
-        const user = await Users.findAll({
-            where:{
-                email: req.body.email
-            }
-        });
-       
-        const match = await bcrypt.compare(req.body.password, user[0].password);
-        if(!match) return res.status(400).json({msg: "비밀번호를 잘못 입력했습니다.\n입력하신 내용을 다시 확인해주세요."});
-        const userId = user[0].id;
-        const name = user[0].name;
-        const email = user[0].email;
-        const accessToken = jwt.sign({userId, name, email}, process.env.ACCESS_TOKEN_SECRET,{
-            expiresIn: '15s'
-        });
-        const refreshToken = jwt.sign({userId, name, email}, process.env.REFRESH_TOKEN_SECRET,{
-            expiresIn: '1d'
-        });
-        await Users.update({refresh_token: refreshToken},{
-            where:{
-                id: userId
-            }
-        });
-        res.cookie('refreshToken', refreshToken,{
-            httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000
-        });
-        res.json({ accessToken });
-    } catch (error) {
-        console.log("error = = = > ", error)
-        res.status(404).json({msg:"이메일 또는 비밀번호를 잘못 입력했습니다.\n입력하신 내용을 다시 확인해주세요."});
-    }
-}
- 
-export const Logout = async(req, res) => {
-    const refreshToken = req.cookies.refreshToken;
-    if(!refreshToken) return res.sendStatus(204);
-    const user = await Users.findAll({
-        where:{
-            refresh_token: refreshToken
-        }
-    });
-    if(!user[0]) return res.sendStatus(204);
-    const userId = user[0].id;
-    await Users.update({refresh_token: null},{
-        where:{
-            id: userId
-        }
-    });
-    res.clearCookie('refreshToken');
-    return res.sendStatus(200);
-}
- 
-// 거래처 리스트
-export const getClients = async(req, res) => {
-    try {
-        const client = await Client.findAll({
-            attributes:['id','client_cd','client_nm','representative','company_nb','phone','useStatus','transferInfo','Address','businessStatus','event']
-        });
-        console.log("client",client)
-        res.json(client);
-        
-    } catch (error) {
-        console.log('error = = > ',error);
+        res.status(500).json({ msg: "Server Error" });
     }
 }
 
-export const ClientRegister = async(req, res) => {
-    const { client_cd, client_nm, representative } = req.body;
-    
+// 로그인
+export const Login = async (req, res) => {
     try {
-        await Client.create({
-            client_cd: client_cd,
-            client_nm: client_nm,
-            representative: representative,
+        const { email, password } = req.body;
+
+        // 유효한 사용자인지 확인하는 로직
+        const user = await Users.findOne({
+            where: {
+                email: email
+            }
         });
-        res.json({msg: "Registration Successful"});
+        if (!user) return res.status(401).json({ msg: "이메일 또는 비밀번호를 잘못 입력했습니다.\n입력하신 내용을 다시 확인해주세요." });
+
+        // 비밀번호가 일치하는지 확인하는 로직
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) return res.status(401).json({ msg: "이메일 또는 비밀번호를 잘못 입력했습니다.\n입력하신 내용을 다시 확인해주세요." });
+
+        const { id, name, email: userEmail } = user;
+
+        // 새로운 액세스 토큰 발급
+        const accessToken = jwt.sign({ userId: id, name, email: userEmail }, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: "70s",
+        });
+
+        const refreshToken = jwt.sign({ userId: id, name, email: userEmail }, process.env.REFRESH_TOKEN_SECRET, {
+            expiresIn: "1d",
+        });
+
+        // 이전 세션 무효화
+        user.session_id = crypto.randomBytes(20).toString('hex');
+        await user.save();
+
+        await Users.update({ refresh_token: refreshToken }, {
+            where: {
+                id
+            }
+        });
+        
+        // 리프레시 토큰 쿠키 설정
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            maxAge: 24 * 60 * 60 * 1000
+        });
+        res.json({ access_token: accessToken });
     } catch (error) {
-        console.log(error);
+        console.log(error)
+        res.status(500).json({ msg: "Server Error" });
     }
+}
+
+// 로그아웃
+export const Logout = async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) return res.sendStatus(200);
+    const user = await Users.findOne({
+        where: {
+            refresh_token: refreshToken
+        }
+    });
+
+    if (!user) return res.sendStatus(200);
+    await Users.update({ refresh_token: null }, {
+        where: {
+            id: user.id
+        }
+    });
+    res.clearCookie('refreshToken');
+    res.status(200).send('Logged out successfully');
 }
