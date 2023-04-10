@@ -1,15 +1,4 @@
-// var mysql = require('mysql');
-// const db = mysql.createPool({
-//     host : 'localhost',
-//     user : 'root',
-//     password : '0000',
-//     database : 'userinfo_db',
-//     port : '3306'
-// });
-
-// module.exports = db;
-
-import { Sequelize } from "sequelize";
+const { Sequelize } = require("sequelize");
 
 const db = new Sequelize('gursung_db', 'root', '0000', {
     host: "localhost",
@@ -17,6 +6,7 @@ const db = new Sequelize('gursung_db', 'root', '0000', {
     pool: {
         max: 5,
         min: 0,
+        acquire: 30000,
         idle: 10000
     },
     define: {
@@ -25,5 +15,4 @@ const db = new Sequelize('gursung_db', 'root', '0000', {
     }
 });
 
-
-export default db;
+module.exports = db;

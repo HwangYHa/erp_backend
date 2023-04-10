@@ -1,11 +1,11 @@
-import Users from "../models/UserModel.js";
-import bcrypt from "bcrypt";
-import crypto from'crypto';
-import jwt from "jsonwebtoken";
+const Users = require('../models/UserModel.js');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 // 취약점및 보완점 패치 완료(2023.02.20)
 
 // 사용자 정보 반환
-export const getUsers = async (req, res) => {
+exports.getUsers = async (req, res) => {
     try {
         const users = await Users.findAll({
             attributes: ['id', 'name', 'email', 'phone']
@@ -18,7 +18,7 @@ export const getUsers = async (req, res) => {
 }
 
 // 사용자 등록
-export const registerUser = async (req, res) => {
+exports.registerUser = async (req, res) => {
     const { name, email, password, confPassword, phone } = req.body;
 
     if (password !== confPassword) return res.status(400).json({ msg: "Password and Confirm Password do not match" });
@@ -41,7 +41,7 @@ export const registerUser = async (req, res) => {
 }
 
 // 로그인
-export const Login = async (req, res) => {
+exports.Login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -92,7 +92,7 @@ export const Login = async (req, res) => {
 }
 
 // 로그아웃
-export const Logout = async (req, res) => {
+exports.Logout = async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) return res.sendStatus(200);
     const user = await Users.findOne({

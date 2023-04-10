@@ -1,27 +1,39 @@
-import Client from "../models/ClientModel.js";
+const Client = require("../models/ClientModel.js");
 
 // 거래처 리스트
-export const getClients = async(req, res) => {
+exports.getClients = async(req, res) => {
     try {
         const client = await Client.findAll({
-            attributes:['id','client_cd','client_nm','representative','company_nb','phone','useStatus','transferInfo','Address','businessStatus','event']
+            attributes:['id','client_cd', 'client_nm', 'Classification', 'ceo', 'event', 'company_nb','fax','searchContents','mobile','address','address2','homePage','manager', 'email', 'accountGroup', 'accountGroup2', 'accountLayerGroup', 'transferInfo', 'useStatus']
         });
-        console.log("client",client)
         res.json(client);
-        
     } catch (error) {
-        console.log('error = = > ',error);
+        console.log(error);
     }
 }
 
-export const registerClient = async(req, res) => {
-    const { client_cd, client_nm, representative } = req.body;
+exports.registerClient = async(req, res) => {
+    const { client_cd, client_nm, Classification, ceo, event, company_nb, fax, searchContents, mobile, address, address2, homePage, manager, email, accountGroup, accountGroup2, accountLayerGroup } = req.body;
     
     try {
         await Client.create({
             client_cd: client_cd,
             client_nm: client_nm,
-            representative: representative,
+            Classification: Classification,
+            ceo: ceo,
+            event: event,
+            company_nb: company_nb,
+            fax: fax,
+            searchContents: searchContents,
+            mobile: mobile,
+            address: address,
+            address2: address2,
+            homePage: homePage,
+            manager: manager,
+            email: email,
+            accountGroup: accountGroup,
+            accountGroup2: accountGroup2,
+            accountLayerGroup: accountLayerGroup,
         });
         res.json({msg: "Registration Successful"});
     } catch (error) {

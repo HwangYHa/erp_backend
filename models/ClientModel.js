@@ -1,39 +1,65 @@
-import { Sequelize } from "sequelize";
-import db from "../config/db.js";
- 
+const Sequelize = require("sequelize");
+const db = require("../config/db.js");
+
 const { DataTypes } = Sequelize;
 
-const Client = db.define('client_tb',{
-    client_cd:{
+const Client = db.define('client_tb', {
+    client_cd: {
         type: DataTypes.STRING
     },
-    client_nm:{
+    client_nm: {
         type: DataTypes.STRING
     },
-    representative:{
+    Classification: {
         type: DataTypes.STRING
     },
-    company_nb:{
+    ceo: {
         type: DataTypes.STRING
     },
-    phone:{
+    event: {
         type: DataTypes.STRING
     },
-    useStatus:{
+    company_nb: {
         type: DataTypes.STRING
     },
-    transferInfo:{
+    fax: {
         type: DataTypes.STRING
     },
-    Address:{
+    searchContents: {
         type: DataTypes.STRING
     },
-
-    businessStatus:{
+    mobile: {
         type: DataTypes.STRING
     },
-    event:{
+    address: {
+        type: DataTypes.STRING
+    },
+    address2: {
+        type: DataTypes.STRING
+    },
+    homePage: {
+        type: DataTypes.STRING
+    },
+    manager: {
+        type: DataTypes.STRING
+    },
+    email: {
+        type: DataTypes.STRING
+    },
+    accountGroup: {
+        type: DataTypes.STRING
+    },
+    accountGroup2: {
+        type: DataTypes.STRING
+    },
+    accountLayerGroup: {
+        type: DataTypes.STRING
+    },
+    transferInfo: {
+        type: DataTypes.STRING
+    },
+    useStatus: {
         type: DataTypes.STRING
     },
 });
-export default Client;
+module.exports = Client;

@@ -1,8 +1,6 @@
-import { Sequelize } from "sequelize";
-import db from "../config/db.js";
- 
-const { DataTypes } = Sequelize;
- 
+const { Sequelize, DataTypes } = require('sequelize');
+const db = require('../config/db');
+
 const Users = db.define('user_tb',{
     email:{
         type: DataTypes.STRING
@@ -20,8 +18,5 @@ const Users = db.define('user_tb',{
         type: DataTypes.TEXT
     }
 });
-// (async () => {
-//     await db.sync();
-//     console.log('데이터베이스 연결 성공');
-// })();
-export default Users;
+
+module.exports = Users;
