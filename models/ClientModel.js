@@ -62,4 +62,5 @@ const Client = db.define('client_tb', {
         type: DataTypes.STRING
     },
 });
+
 module.exports = Client;

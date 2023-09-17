@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const path = require('path');
 
-const {userRouter, clientRouter, warehouseRouter, itemRouter} = require('./routes/index.js');
+const {userRouter, clientRouter, warehouseRouter, itemRouter, orderRouter} = require('./routes/index.js');
 dotenv.config();
 const app = express();
 
@@ -20,5 +20,7 @@ app.use(userRouter);
 app.use(clientRouter);
 app.use(warehouseRouter);
 app.use(itemRouter);
+app.use(orderRouter);
+ 
  
 app.listen(5000, ()=> console.log('Server running at port 5000'));

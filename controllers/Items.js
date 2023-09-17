@@ -47,7 +47,7 @@ exports.registerItem = async function (req, res) {
     const upload = multer({
         storage: multer.diskStorage({
             destination(req, file, cb) {
-                cb(null, 'public/uploads'); // public 폴더 아래의 uploads 폴더에 저장합니다.
+                cb(null, 'public/uploads'); // public 폴더 아래의 uploads 폴더에 저장
             },
             filename(req, file, cb) {
                 // 한글 파일명 깨짐 해결
@@ -58,12 +58,12 @@ exports.registerItem = async function (req, res) {
                 const filename = path.basename(file.originalname, ext) + Date.now() + ext;
                 cb(null, filename);
 
-                // 업로드한 파일의 경로를 반환합니다.
+                // 업로드한 파일의 경로를 반환
                 req.filepath = `uploads/${filename}`;
             },
         }),
         limits: { fileSize: 5 * 1024 * 1024 },
-    }).single('file'); // single 메서드를 사용하여 하나의 이미지를 업로드할 수 있도록 설정합니다.
+    }).single('file'); // single 메서드를 사용하여 하나의 이미지를 업로드할 수 있도록 설정
 
 
     upload(req, res, async (err) => {
@@ -74,7 +74,7 @@ exports.registerItem = async function (req, res) {
         const { product_cd, product_nm, product_g, specification, purchase_p, sales_p, product_c, inventory_m, sales_p_g, production_p, label } = req.body;
 
         try {
-            const imagePath = req.filepath; // 이미지 파일 경로를 변수에 저장합니다.
+            const imagePath = req.filepath;
             await Item.create({
                 product_cd: product_cd,
                 product_nm: product_nm,
@@ -86,11 +86,7 @@ exports.registerItem = async function (req, res) {
                 inventory_m: inventory_m,
                 sales_p_g: sales_p_g,
                 production_p: production_p,
-                // image: req.file ? req.file.path : null, // 이미지 파일 경로가 있으면 저장합니다.
-                // image: req.file ? req.file.filename : null, // 이미지 파일명이 있으면 저장합니다.
-                // image: imagePath, // 이미지 파일 경로를 전달합니다.
-                // image: req.file ? `/uploads/${req.file.filename}` : null, // public 폴더 아래의 상대 경로를 사용합니다.
-                image: req.file ? `uploads/${req.file.filename}` : null, // public 폴더 아래의 상대 경로를 사용합니다.
+                image: req.file ? `uploads/${req.file.filename}` : null,
                 label: label,
             });
             res.json({ msg: "Registration Successful" });
@@ -100,3 +96,23 @@ exports.registerItem = async function (req, res) {
         }
     });
 };
+
+
+exports.getItemByName = async function (req, res) {
+    const { code } = req.query;
+    
+    try {
+      const product = await Item.findOne({ where: { product_cd: code } });
+  
+      if (!product) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+  
+      const productName = product.product_nm;
+      const price = product.sales_p;
+      res.json({ productName, price });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  };
